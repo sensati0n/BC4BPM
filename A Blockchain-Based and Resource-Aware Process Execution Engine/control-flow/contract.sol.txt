@@ -1,0 +1,98 @@
+contract ContractCollaborationManager {
+
+    enum Tasktype {TASK, AND, OR, XOR}
+    struct Task { uint id; string activity; bool completed; Tasktype tasktype; uint[] requirements; }
+    mapping(uint=>Task) tasks; uint[] public tasksArray; 
+    
+    uint taskcount;
+    
+    constructor() public {
+        taskcount = 0;
+    }
+    
+    function addTask(string memory activity, Tasktype tasktype, uint[] memory requirements) public {
+        Task storage task = tasks[taskcount++];
+        task.completed = false;
+        task.activity = activity;
+        task.tasktype = tasktype;
+        task.requirements = requirements;
+        tasksArray.push(taskcount)-1;
+    }
+
+    function setTaskOnCompleted(uint id) public returns(bool success) {
+        uint tempcount;
+        uint[] memory temprequire = tasks[ id].requirements;
+        
+        //START
+        if(temprequire.length == 0) {
+            tasks[ id].completed = true; return true; }
+        
+        //TASK
+        if (tasks[id].tasktype == Tasktype.TASK) {
+            if(isTaskCompletedById(temprequire[0]) == true) {
+                tasks[id].completed = true;
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        
+        //AND
+        if (tasks[ id].tasktype == Tasktype.AND) {
+            for(uint i = 0; i < temprequire.length ; i++) {
+                if(isTaskCompletedById(temprequire[i])==true) {
+                    tempcount++;
+                }
+            }
+            if(tempcount == temprequire.length) {
+                tasks[id].completed = true;
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        
+         //XOR
+        if (tasks[ id].tasktype == Tasktype.XOR) {
+            for(uint i = 0; i < temprequire.length ; i++) {
+                if(isTaskCompletedById(temprequire[i])==true) {
+                    tempcount++;
+                }
+            }
+            if(tempcount == 1) {
+                tasks[id].completed = true;
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        
+         //OR
+        if (tasks[ id].tasktype == Tasktype.XOR) {
+            for(uint i = 0; i < temprequire.length ; i++) {
+                if(isTaskCompletedById(temprequire[i])==true) {
+                    tempcount++;
+                }
+            }
+            if(tempcount  > 0) {
+                tasks[id].completed = true;
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    
+    function isTaskCompletedById(uint id) public view returns (bool success) {
+        if(tasks[id].completed == true) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+}
